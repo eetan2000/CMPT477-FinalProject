@@ -3,11 +3,18 @@ from typing import List
 
 TOKEN_RE = re.compile(r"\s*(=>|->|<->|forall|exists|[A-Za-z_]\w*|[(),;.&|~]|\.|[^\s])")
 
-
+# Start with tokenizing the formula
 def tokenize(s: str) -> List[str]:
     return [t for t in TOKEN_RE.findall(s) if t.strip() != ""]
 
-
+# Recursively parse the formula. Start with top level expression and recursively parse the sub-level
+# expressions to get a parse tree.
+# EX. p(x) -> q(x)
+# (
+#     "implies",
+#     ("pred", "p", [Term("x")]),
+#     ("pred", "q", [Term("x")]),
+# )
 class Parser:
     def __init__(self, tokens: List[str]):
         self.tokens = tokens
