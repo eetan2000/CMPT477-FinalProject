@@ -170,18 +170,148 @@ class Variable(Term):
     def is_var(self):
         return True
 
+### ============================= ###
+#       Helper functions            #
+### ============================= ###
+# print F of, After which <stage>
+def print_ast_stage(ast, stage):
+    print("======= After " + stage + " =======")
+    try:
+        print(ast_to_str(ast))
+    except Exception:
+        print(f"  {repr(ast)}")
+    print()
 
+
+#&### for converting to Clausal Forms
+### ===================================== ###
+#       Step 2 - convert to PNF             #
+#       (all quantifier at top level)       #
+### ===================================== ###
+# TODO: 
+# Step 2.1 - eliminate iif <->
+def eliminate_iff(ast):
+    return ast
+
+# TODO: 
+# Step 2.2 - eliminate implies ->
+def eliminate_implies(ast):
+    return ast
+
+# TODO: 
+# Step 2.3 - push negation
+def push_not(ast):
+    return ast
+
+# TODO: 
+# Step 2.1 - standardize variables
+def standardize_variables(ast):
+    return ast
+
+# Flow of convert to PNF
+def to_PNF(ast):
+    # Step 2.1 - eliminate iif
+    ast2_1 = eliminate_iff(ast)
+    print_ast_stage(ast2_1, "Step 2.1 - elimate iif <->")
+
+    # Step 2.2 - eliminate implies
+    ast2_2 = eliminate_implies(ast2_1)
+    print_ast_stage(ast2_2, "Step 2.2 - eliminate implies ->")
+
+    # Step 2.3 - push not close to terms
+    ast2_3 = push_not(ast2_2)
+    print_ast_stage(ast2_3, "Step 2.3 - push negation to terms")
+
+    # Step 2.4 - standardize variables
+    ast2_4 = standardize_variables(ast2_3)
+    print_ast_stage(ast2_4, "Step 2.4 - standardize variable")
+    return ast2_4
+
+
+### ===================================== ###
+#       Step 3 - skolemization              #
+#       (remove existent quantifiers)       #
+### ===================================== ###
+def skolemize(ast):
+    # TODO
+    return ast
+
+
+### ==================================== ###
+#       Step 4 - drop quantifiers          #
+#       (remove all quantifiers)           #
+### ==================================== ###
+def drop_universal(ast):
+    if not isinstance(ast, tuple):
+        return ast
+    if ast[0] == "forall":
+        return drop_universal(ast[2])
+    if ast[0] in ("and", "or"):
+        return (ast[0], drop_universal(ast[1]), drop_universal(ast[2]))
+    if ast[0] == "not":
+        return ("not", drop_universal(ast[1]))
+    return ast
+
+
+### ==================================== ###
+#       Step 5 - convert to CNF            #
+#       (distribute or over and)           #
+### ==================================== ###
+def distribute_or_over_and(ast):
+    return ast
+
+
+### ==================================== ###
+#       Step 6 - to Clausal form           #
+#       (set of clauses)                   #
+### ==================================== ###
+def to_clauses(ast):
+    clauses = []
+    return clauses
+
+
+### ==================================== ###
+#       the "Main" function flow           #
+### ==================================== ###
+### The "main" function
 def prove_formula(input_str: str, max_steps: int = 5000):
     formula_text = extract_formula_input(input_str)
     # Parse
     try:
         ast = parse(formula_text)
+        print_ast_stage(ast, "extract, Original Foumula")
     except Exception as e:
-        return f"Parse error: {e}"
-    print("Original Formula:")
-    print_formula(ast)
+        return f"Parse error: {e}"   
+
+    # to negation F
+    ast1 = ("not", ast)
+    
+    # Step 2. to PNF (eliminate <->, ->, to NNF, rename)
+    ast2 = to_PNF(ast1)
+    print_ast_stage(ast2, "Step 2(result) - to PNF")
+
+    # Step 3. skolemization
+    ast3 = skolemize(ast2)
+    print_ast_stage(ast3, "Step 3 - skolemization")
+
+    # Step 4. drop universal quantifiers
+    ast4 = drop_universal(ast3)
+    print_ast_stage(ast4, "Step 4 - dropped quantifiers")
+
+    # Step 5. to CNF (distribute or over and)
+    ast5 = distribute_or_over_and(ast4)
+    print_ast_stage(ast5, "Step 5 - to CNF")
+
+    # Step 6. to Clausal form
+    clauses = to_clauses(ast5)
+
+    # TODO: Step 7. Resolution
+    
 
 
+### ==================================== ###
+#       input's helper functions           #
+### ==================================== ###
 def extract_formula_input(s: str) -> str:
     if ":" in s:
         parts = s.split(":", 1)
@@ -194,12 +324,6 @@ def parse(s: str):
     p = Parser(toks)
     return p.parse_formula()
 
-def print_formula(ast):
-    try:
-        print(ast_to_str(ast))
-    except Exception:
-        print(repr(ast))
-    print()
 
 def ast_to_str(ast):
     op = ast[0]
