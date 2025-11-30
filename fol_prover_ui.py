@@ -5,6 +5,7 @@ from tkinter import ttk, messagebox
 
 from fol_logic import prove_formula
 
+import time
 
 class FOLProverUI:
     def __init__(self, root: tk.Tk):
@@ -86,6 +87,9 @@ class FOLProverUI:
         self.status_var.set("Proving...")
         self.root.update_idletasks()
 
+        # Time start
+        start = time.time()
+
         # ---- Call logic here ----
         try:
             result = prove_formula(formula, max_steps=max_steps)
@@ -94,6 +98,9 @@ class FOLProverUI:
             self._show_error(f"Exception in prover: {e}")
             self.status_var.set("Error.")
             return
+        
+        # Time end
+        end = time.time()
 
         # Normalize result
         is_valid = result.get("is_valid")
@@ -113,6 +120,8 @@ class FOLProverUI:
             summary = "RESULT: ERROR or UNKNOWN.\n"
 
         self.output_text.insert(tk.END, summary)
+        # Output time
+        self.output_text.insert(tk.END, f"\nTime: {end - start:.6f} seconds\n")
         self.output_text.insert(tk.END, f"Message: {message}\n\n")
 
         if steps:
