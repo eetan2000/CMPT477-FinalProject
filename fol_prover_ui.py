@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 # Import logic here
-
 from fol_logic import prove_formula
 
 
@@ -17,6 +16,7 @@ class FOLProverUI:
         input_frame.pack(side=tk.TOP, fill=tk.X)
 
         # Formula label
+
         label = ttk.Label(input_frame, text="Input Formula:")
         label.grid(row=0, column=0, sticky="w")
 
