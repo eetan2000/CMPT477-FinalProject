@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox
 
 # Import logic here
 from fol_logic import prove_formula
-
+import time
 
 class FOLProverUI:
     def __init__(self, root: tk.Tk):
@@ -88,9 +88,10 @@ class FOLProverUI:
 
         # ---- Call logic here ----
         try:
+            start = time.perf_counter()
             result = prove_formula(formula, max_steps=max_steps)
+            elapsed = time.perf_counter() - start
         except Exception as e:
-            # Catch any unexpected errors from your logic
             self._show_error(f"Exception in prover: {e}")
             self.status_var.set("Error.")
             return
@@ -114,6 +115,9 @@ class FOLProverUI:
 
         self.output_text.insert(tk.END, summary)
         self.output_text.insert(tk.END, f"Message: {message}\n\n")
+        self.output_text.insert(tk.END, f"Time: {elapsed:.4f} seconds\n\n")
+        self.output_text.see(tk.END)
+        self.status_var.set(f"Done. Time: {elapsed:.4f}s")
 
         if steps:
             self.output_text.insert(tk.END, "=== Proof steps ===\n")
